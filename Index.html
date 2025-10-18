@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linktree Lite</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config for arbitrary color opacity utilities
+    tailwind.config = {
+      theme: { extend: {} }
+    }
+  </script>
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent:#3A5C43; }
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    .accent { color: var(--accent); }
+    .bg-accent { background: var(--accent); }
+    .border-accent { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f7f1e3] text-zinc-900">
+  <div id="app" class="mx-auto max-w-md px-5 pb-24 pt-10">
+    <!-- Header -->
+    <div class="w-full flex flex-col items-center text-center">
+      <div class="p-1 rounded-full bg-accent/90" id="avatarRing">
+        <img id="avatar" class="w-24 h-24 rounded-full object-cover" alt="avatar" />
+      </div>
+      <h1 id="name" class="mt-4 text-2xl font-semibold">Your Brand</h1>
+      <p id="handle" class="mt-1 text-sm opacity-80">@yourhandle</p>
+      <p id="bio" class="mt-3 text-sm max-w-md"></p>
+      <div id="locationWrap" class="mt-3 text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 bg-white/70 backdrop-blur border">
+        <i data-lucide="map-pin" class="w-3 h-3 opacity-70"></i>
+        <span id="location">City</span>
+      </div>
+      <a id="website" href="#" target="_blank" class="mt-3 inline-flex items-center gap-2 text-sm underline underline-offset-4 accent"></a>
+    </div>
+
+    <!-- Socials -->
+    <div id="socials" class="mt-5 flex flex-wrap items-center justify-center gap-3"></div>
+
+    <!-- Links -->
+    <div id="links" class="mt-6 grid gap-3"></div>
+
+    <!-- Settings Panel (Builder) -->
+    <div class="mt-10 rounded-2xl p-4 border bg-white/70 backdrop-blur" id="builder">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium">Quick Builder</p>
+        <button id="toggleThemePanel" class="text-xs px-2 py-1 rounded border">Hide</button>
+      </div>
+      <div id="builderBody" class="mt-4 space-y-6">
+        <!-- Theme presets -->
+        <section>
+          <p class="text-sm font-medium mb-2">Theme</p>
+          <div id="themeChips" class="flex flex-wrap gap-2"></div>
+          <div class="mt-3 flex items-center gap-3">
+            <label class="text-sm">Link style</label>
+            <select id="linkStyle" class="px-3 py-1.5 rounded-md border bg-white/80">
+              <option value="solid">Solid</option>
+              <option value="outline">Outline</option>
+              <option value="pill">Pill</option>
+            </select>
+            <label class="text-sm ml-3">Radius</label>
+            <select id="radius" class="px-3 py-1.5 rounded-md border bg-white/80">
+              <option>none</option>
+              <option>md</option>
+              <option>lg</option>
+              <option>xl</option>
+              <option selected>2xl</option>
+              <option>3xl</option>
+              <option>full</option>
+            </select>
+          </div>
+        </section>
+        <!-- Profile -->
+        <section class="grid gap-2">
+          <p class="text-sm font-medium">Profile</p>
+          <input id="inpName" class="input" placeholder="Name" />
+          <input id="inpHandle" class="input" placeholder="Handle (@...)" />
+          <input id="inpAvatar" class="input" placeholder="Avatar URL" />
+          <input id="inpBio" class="input" placeholder="Bio" />
+          <input id="inpLocation" class="input" placeholder="Location" />
+          <input id="inpWebsite" class="input" placeholder="Website (https://...)" />
+        </section>
+        <!-- Socials table -->
+        <section>
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-medium">Socials</p>
+            <button id="addSocial" class="text-xs px-2 py-1 rounded border">Add</button>
+          </div>
+          <div id="socialList" class="space-y-2"></div>
+        </section>
+        <!-- Links table -->
+        <section>
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-medium">Links</p>
+            <button id="addLink" class="text-xs px-2 py-1 rounded border">Add</button>
+          </div>
+          <div id="linkList" class="space-y-2"></div>
+        </section>
+        <!-- Actions -->
+        <section class="flex flex-wrap gap-2">
+          <button id="save" class="px-3 py-2 rounded-md border">Save to browser</button>
+          <button id="reset" class="px-3 py-2 rounded-md border">Reset</button>
+          <button id="exportJson" class="px-3 py-2 rounded-md border">Export JSON</button>
+          <label class="px-3 py-2 rounded-md border cursor-pointer">
+            Import JSON<input id="importJson" type="file" accept="application/json" class="hidden" />
+          </label>
+        </section>
+        <p class="text-xs opacity-70">Data is stored locally in your browser (localStorage). Export JSON to share or deploy. You can delete the entire Builder panel before shipping.</p>
+      </div>
+    </div>
+
+    <div id="footer" class="mt-10 text-center text-xs opacity-70">
+      Built with ❤️ Linktree Lite
+    </div>
+  </div>
+
+  <template id="tmplSocialRow">
+    <div class="flex gap-2">
+      <select class="w-40 px-3 py-1.5 rounded-md border bg-white/80">
+        <option>instagram</option>
+        <option>youtube</option>
+        <option>tiktok</option>
+        <option>website</option>
+        <option>email</option>
+        <option>phone</option>
+        <option>custom</option>
+      </select>
+      <input class="flex-1 px-3 py-1.5 rounded-md border bg-white/80" placeholder="Label" />
+      <input class="flex-1 px-3 py-1.5 rounded-md border bg-white/80" placeholder="URL (mailto:, tel:, https://)" />
+      <button class="px-2 rounded border" title="Delete">✕</button>
+    </div>
+  </template>
+
+  <template id="tmplLinkRow">
+    <div class="flex gap-2">
+      <input class="flex-1 px-3 py-1.5 rounded-md border bg-white/80" placeholder="Label" />
+      <input class="flex-1 px-3 py-1.5 rounded-md border bg-white/80" placeholder="URL" />
+      <input class="w-40 px-3 py-1.5 rounded-md border bg-white/80" placeholder="Badge (optional)" />
+      <button class="px-2 rounded border" title="Delete">✕</button>
+    </div>
+  </template>
+
+  <script>
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+
+  // --- THEMES --------------------------------------------------------------
+  const PRESET_THEMES = {
+    retro:   { bg:'#f7f1e3', fg:'#1f2937', accent:'#3A5C43', card:'rgba(255,255,255,.8)' },
+    forest:  { bg:'#ecfdf5', fg:'#064e3b', accent:'#065f46', card:'rgba(255,255,255,.8)' },
+    midnight:{ bg:'#0a0a0a', fg:'#f5f5f5', accent:'#60a5fa', card:'rgba(23,23,23,.7)' },
+    sunrise: { bg:'linear-gradient(to bottom,#fff1f2,#fff7ed)', fg:'#881337', accent:'#fb7185', card:'rgba(255,255,255,.7)' },
+    ocean:   { bg:'linear-gradient(to bottom,#f0f9ff,#ecfeff)', fg:'#0f172a', accent:'#0284c7', card:'rgba(255,255,255,.8)' },
+  };
+
+  // --- DEFAULT CONFIG ------------------------------------------------------
+  const DEFAULT_CONFIG = {
+    profile: {
+      name: "Your Brand",
+      handle: "@yourhandle",
+      avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=640&auto=format&fit=crop",
+      bio: "Short bio goes here.",
+      location: "City, Country",
+      website: "https://example.com",
+    },
+    socials: [
+      { type:'instagram', label:'Instagram', url:'https://instagram.com/' },
+      { type:'youtube', label:'YouTube', url:'https://youtube.com/' }
+    ],
+    links: [
+      { label:"Primary CTA", url:"https://example.com", badge:"New" },
+      { label:"Portfolio", url:"#" },
+      { label:"Contact", url:"mailto:hello@example.com" }
+    ],
+    theme: { preset:'retro', linkStyle:'solid', radius:'2xl' },
+    options: { showAvatarRing:true, showHandle:true, showLocation:true, showWebsite:true }
+  };
+
+  const STORAGE_KEY = 'linktree-lite-config-v1';
+
+  let state = loadState();
+
+  // --- INITIALIZE ----------------------------------------------------------
+  function init() {
+    // Build theme chips
+    const themeChips = $('#themeChips');
+    themeChips.innerHTML = '';
+    Object.keys(PRESET_THEMES).forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'px-3 py-1.5 rounded-full text-sm border bg-white/70';
+      btn.textContent = k;
+      btn.addEventListener('click', () => { state.theme.preset = k; render(); saveLocal(); });
+      themeChips.appendChild(btn);
+    });
+
+    // Wire builder fields
+    $('#linkStyle').value = state.theme.linkStyle;
+    $('#radius').value = state.theme.radius;
+    $('#linkStyle').addEventListener('change', e => { state.theme.linkStyle = e.target.value; render(); saveLocal(); });
+    $('#radius').addEventListener('change', e => { state.theme.radius = e.target.value; render(); saveLocal(); });
+
+    // Profile inputs
+    $('#inpName').value = state.profile.name;
+    $('#inpHandle').value = state.profile.handle;
+    $('#inpAvatar').value = state.profile.avatarUrl;
+    $('#inpBio').value = state.profile.bio;
+    $('#inpLocation').value = state.profile.location;
+    $('#inpWebsite').value = state.profile.website;
+
+    ['inpName','inpHandle','inpAvatar','inpBio','inpLocation','inpWebsite'].forEach(id => {
+      $('#'+id).addEventListener('input', () => {
+        state.profile = {
+          name: $('#inpName').value,
+          handle: $('#inpHandle').value,
+          avatarUrl: $('#inpAvatar').value,
+          bio: $('#inpBio').value,
+          location: $('#inpLocation').value,
+          website: $('#inpWebsite').value,
+        };
+        render();
+      });
+    });
+
+    // Socials list
+    rebuildSocialList();
+    $('#addSocial').addEventListener('click', () => {
+      state.socials.push({ type:'custom', label:'Custom', url:'#' });
+      rebuildSocialList(); render(); saveLocal();
+    });
+
+    // Links list
+    rebuildLinkList();
+    $('#addLink').addEventListener('click', () => {
+      state.links.push({ label:'New link', url:'#' });
+      rebuildLinkList(); render(); saveLocal();
+    });
+
+    // Actions
+    $('#save').addEventListener('click', () => { saveLocal(true); });
+    $('#reset').addEventListener('click', () => { if(confirm('Reset to defaults?')) { state = structuredClone(DEFAULT_CONFIG); render(); rebuildSocialList(); rebuildLinkList(); saveLocal(); } });
+    $('#exportJson').addEventListener('click', exportJson);
+    $('#importJson').addEventListener('change', importJson);
+
+    // Hide toggle
+    $('#toggleThemePanel').addEventListener('click', () => {
+      const body = $('#builderBody');
+      const btn = $('#toggleThemePanel');
+      const hidden = body.classList.toggle('hidden');
+      btn.textContent = hidden ? 'Show' : 'Hide';
+    });
+
+    render();
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(DEFAULT_CONFIG);
+      const parsed = JSON.parse(raw);
+      // shallow merge to allow upgrades
+      return Object.assign({}, DEFAULT_CONFIG, parsed, {
+        profile: Object.assign({}, DEFAULT_CONFIG.profile, parsed.profile||{}),
+        theme: Object.assign({}, DEFAULT_CONFIG.theme, parsed.theme||{}),
+        options: Object.assign({}, DEFAULT_CONFIG.options, parsed.options||{}),
+        socials: parsed.socials || DEFAULT_CONFIG.socials,
+        links: parsed.links || DEFAULT_CONFIG.links,
+      });
+    } catch(e) { console.warn('Bad config in storage, resetting.', e); return structuredClone(DEFAULT_CONFIG); }
+  }
+
+  function saveLocal(notify=false) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (notify) toast('Saved to your browser');
+  }
+
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-2 rounded-md opacity-0';
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>{
+      t.classList.add('opacity-90');
+      setTimeout(()=>{ t.classList.remove('opacity-90'); setTimeout(()=>t.remove(), 250); }, 1200);
+    });
+  }
+
+  function applyTheme() {
+    const t = PRESET_THEMES[state.theme.preset] || PRESET_THEMES.retro;
+    document.body.style.background = t.bg;
+    document.body.style.color = t.fg;
+    document.documentElement.style.setProperty('--accent', t.accent);
+    // card color for badges
+    return t;
+  }
+
+  function render() {
+    const theme = applyTheme();
+    // Header
+    $('#avatar').src = state.profile.avatarUrl;
+    $('#name').textContent = state.profile.name;
+    $('#handle').textContent = state.options.showHandle ? state.profile.handle : '';
+    $('#bio').textContent = state.profile.bio || '';
+    $('#location').textContent = state.profile.location || '';
+    $('#locationWrap').style.display = state.options.showLocation && state.profile.location ? '' : 'none';
+    const w = $('#website');
+    if (state.options.showWebsite && state.profile.website) {
+      w.href = state.profile.website; w.textContent = state.profile.website.replace(/^https?:\/\//,''); w.style.display = '';
+    } else { w.style.display = 'none'; }
+
+    // Socials
+    const socials = $('#socials'); socials.innerHTML = '';
+    state.socials.forEach((s, i) => {
+      const a = document.createElement('a');
+      a.href = s.url; a.target = '_blank'; a.className = 'w-10 h-10 inline-flex items-center justify-center rounded-full border transition hover:scale-105 bg-white/60 backdrop-blur border-accent';
+      a.title = s.label;
+      const iEl = document.createElement('i');
+      iEl.setAttribute('data-lucide', iconFor(s.type));
+      iEl.className = 'w-5 h-5 accent';
+      a.appendChild(iEl);
+      socials.appendChild(a);
+    });
+
+    // Links
+    const links = $('#links'); links.innerHTML = '';
+    state.links.forEach((l, i) => {
+      const btn = document.createElement('a');
+      btn.href = l.url; btn.target = '_blank';
+      const radius = radiusClass(state.theme.radius);
+      const base = 'w-full flex items-center justify-between gap-3 px-4 py-3 font-medium shadow-sm transition active:scale-[.99]';
+      btn.className = base + ' ' + styleClass(state.theme.linkStyle, radius);
+      const span = document.createElement('span'); span.textContent = l.label; span.className = 'truncate';
+      const icon = document.createElement('i'); icon.setAttribute('data-lucide','external-link'); icon.className = 'w-4 h-4 opacity-80';
+      btn.appendChild(span);
+      if (l.badge) {
+        const badge = document.createElement('span');
+        badge.textContent = l.badge;
+        badge.className = 'ml-2 text-xs px-2 py-1 rounded-full border accent';
+        badge.style.background = theme.card; badge.style.borderColor = 'color-mix(in srgb, var(--accent) 20%, transparent)';
+        btn.appendChild(badge);
+      }
+      btn.appendChild(icon);
+      links.appendChild(btn);
+    });
+
+    lucide.createIcons();
+  }
+
+  function iconFor(type) {
+    switch(type){
+      case 'instagram': return 'instagram';
+      case 'youtube': return 'youtube';
+      case 'tiktok': return 'tiktok';
+      case 'website': return 'globe';
+      case 'email': return 'mail';
+      case 'phone': return 'phone';
+      default: return 'link-2';
+    }
+  }
+
+  function styleClass(style, radius) {
+    if (style === 'outline') return `${radius} border border-accent bg-white/70 text-zinc-900`;
+    if (style === 'pill') return `rounded-full bg-white/70 text-zinc-900`;
+    return `${radius} text-white` + ' bg-accent';
+  }
+
+  function radiusClass(r) {
+    return {
+      none:'rounded-none', md:'rounded-md', lg:'rounded-lg', xl:'rounded-xl', '2xl':'rounded-2xl', '3xl':'rounded-3xl', full:'rounded-full'
+    }[r] || 'rounded-2xl';
+  }
+
+  // --- Builder lists -------------------------------------------------------
+  function rebuildSocialList(){
+    const box = $('#socialList'); box.innerHTML = '';
+    state.socials.forEach((s, idx) => {
+      const row = $('#tmplSocialRow').content.firstElementChild.cloneNode(true);
+      const [typeSel, labelInp, urlInp, delBtn] = row.children;
+      typeSel.value = s.type; labelInp.value = s.label; urlInp.value = s.url;
+      typeSel.addEventListener('change', e => { s.type = e.target.value; render(); saveLocal(); });
+      labelInp.addEventListener('input', e => { s.label = e.target.value; saveLocal(); });
+      urlInp.addEventListener('input', e => { s.url = e.target.value; render(); saveLocal(); });
+      delBtn.addEventListener('click', () => { state.socials.splice(idx,1); rebuildSocialList(); render(); saveLocal(); });
+      box.appendChild(row);
+    });
+  }
+
+  function rebuildLinkList(){
+    const box = $('#linkList'); box.innerHTML = '';
+    state.links.forEach((l, idx) => {
+      const row = $('#tmplLinkRow').content.firstElementChild.cloneNode(true);
+      const [label, url, badge, delBtn] = row.children;
+      label.value = l.label; url.value = l.url; badge.value = l.badge || '';
+      label.addEventListener('input', e => { l.label = e.target.value; render(); saveLocal(); });
+      url.addEventListener('input', e => { l.url = e.target.value; render(); saveLocal(); });
+      badge.addEventListener('input', e => { l.badge = e.target.value; render(); saveLocal(); });
+      delBtn.addEventListener('click', () => { state.links.splice(idx,1); rebuildLinkList(); render(); saveLocal(); });
+      box.appendChild(row);
+    });
+  }
+
+  // --- Import/Export -------------------------------------------------------
+  function exportJson(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'linktree-lite.config.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  }
+  function importJson(e){
+    const file = e.target.files?.[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try { state = JSON.parse(reader.result); saveLocal(); rebuildSocialList(); rebuildLinkList(); render(); toast('Imported'); }
+      catch(err){ alert('Invalid JSON'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // Kick off
+  init();
+  </script>
+</body>
+</html>
